@@ -16,8 +16,26 @@ document.getElementById('recipeForm').addEventListener('submit', async function(
     loadingSection.classList.remove('hidden');
     resultsSection.classList.add('hidden');
     
+    let fetchedTitle = "Cooking Recipe Video Stream";
+
+    // BROWSER-SIDE FETCH: Get the real YouTube video title securely without getting blocked
     try {
-        // NEW: Make a real network handshake request to our Django server endpoint
+        if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+            const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(videoUrl)}&format=json`;
+            const titleResponse = await fetch(oEmbedUrl);
+            if (titleResponse.ok) {
+                const titleData = await titleResponse.json();
+                if (titleData.title) {
+                    fetchedTitle = titleData.title;
+                }
+            }
+        }
+    } catch (titleError) {
+        console.log("Could not fetch title from browser side, falling back:", titleError);
+    }
+    
+    try {
+        // Make a real network handshake request to our Django server endpoint
         const response = await fetch('/api/distill/', {
             method: 'POST',
             headers: {
@@ -25,7 +43,8 @@ document.getElementById('recipeForm').addEventListener('submit', async function(
             },
             body: JSON.stringify({ 
                 url: videoUrl, 
-                lang: chosenLanguage 
+                lang: chosenLanguage,
+                video_title: fetchedTitle // <-- Passing the real title we grabbed
             })
         });
         
