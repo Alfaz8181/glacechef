@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GastroGlass // Premium AI Recipe App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-6 relative overflow-x-hidden">
+    
+    <div class="absolute w-[450px] h-[450px] bg-gradient-to-r from-emerald-500 to-cyan-400 opacity-30 rounded-full blur-[110px] top-5 left-5 animate-pulse dynamic-blob"></div>
+    <div class="absolute w-[500px] h-[500px] bg-gradient-to-r from-purple-600 to-pink-500 opacity-25 rounded-full blur-[130px] bottom-5 right-5 animate-pulse dynamic-blob" style="animation-duration: 8s;"></div>
+
+    <main class="w-full max-w-3xl z-10">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-5xl font-extrabold tracking-tight mb-2">
+                Gastro<span class="text-emerald-400 glowing-text">Glass</span>
+            </h1>
+            <p class="text-slate-400 text-base font-medium">Convert cooking videos into crystal-clear steps.</p>
+        </header>
+
+        <section class="liquid-glass-panel p-6 md:p-10 mb-8">
+            <form id="recipeForm" class="space-y-5">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <input type="url" id="videoUrl" required
+                        class="flex-1 bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-400/50 transition-all backdrop-blur-md" 
+                        placeholder="Paste Instagram Reel or Shorts link here...">
+                    
+                    <select id="language" 
+                        class="bg-slate-900 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:ring-2 focus:ring-emerald-400/50 cursor-pointer">
+                        <option value="en" class="bg-slate-950 text-white">Simple English</option>
+                        <option value="hi" class="bg-slate-950 text-white">Hindi (हिंदी)</option>
+                        <option value="te" class="bg-slate-950 text-white">Telugu (తెలుగు)</option>
+                        <option value="es" class="bg-slate-950 text-white">Spanish (Español)</option>
+                    </select>
+                </div>
+
+                <button type="submit" 
+                    class="w-full py-4 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 font-black text-base rounded-2xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:translate-y-0">
+                    Convert to Simple Steps
+                </button>
+            </form>
+        </section>
+
+        <div id="loadingStatus" class="hidden flex flex-col items-center justify-center p-8 space-y-4">
+            <div class="moving-droplet"></div>
+            <p class="text-emerald-400 font-bold tracking-widest text-xs animate-pulse">AI DISTILLING VIDEO STREAM...</p>
+        </div>
+
+        <section id="recipeResult" class="hidden space-y-6">
+            <div class="liquid-glass-panel p-6">
+                <h2 id="recipeTitle" class="text-3xl font-extrabold mb-2">Recipe Title</h2>
+                <p class="text-xs text-slate-400 tracking-wide font-mono">💡 TIP: Click on any step below to launch full-screen Focus Mode.</p>
+                <div class="h-px bg-white/10 my-4"></div>
+                <h3 class="text-lg font-bold text-emerald-400 mb-3 tracking-wide">Things You Need:</h3>
+                <ul id="ingredientsList" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-300">
+                    </ul>
+            </div>
+
+            <div id="stepsContainer" class="space-y-4">
+                </div>
+        </section>
+    </main>
+
+    <div id="focusOverlay" class="hidden fixed inset-0 z-50 flex items-center justify-center p-6 backdrop-blur-3xl transition-all duration-300">
+        <button id="closeFocusBtn" class="absolute top-6 right-6 text-white/60 hover:text-white text-3xl font-light tracking-wide cursor-pointer p-2">✕ Close</button>
+        
+        <div class="w-full max-w-2xl liquid-glass-panel p-10 md:p-16 text-center space-y-8 shadow-[0_0_60px_rgba(0,0,0,0.8)] relative">
+            <div id="focusBadge" class="inline-block px-4 py-1 rounded-full text-xs font-black tracking-widest text-emerald-400 border border-emerald-400/30 uppercase bg-emerald-400/5">STEP 1</div>
+            <p id="focusText" class="text-2xl md:text-4xl font-semibold leading-relaxed text-slate-100">Step text goes here...</p>
+            
+            <div class="flex justify-between items-center pt-6 text-sm font-bold tracking-wider text-slate-400">
+                <button id="prevStepBtn" class="hover:text-emerald-400 transition-colors disabled:opacity-20 cursor-pointer">← PREV</button>
+                <span id="focusIndicator" class="font-mono text-xs">1 / 5</span>
+                <button id="nextStepBtn" class="hover:text-emerald-400 transition-colors disabled:opacity-20 cursor-pointer">NEXT →</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'app.js' %}"></script>
+</body>
+</html>

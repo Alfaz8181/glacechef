@@ -1,0 +1,4 @@
+django>=5.0
+yt-dlp>=2025.01.01
+google-genai>=0.1.0
+gunicorn>=21.2.0
