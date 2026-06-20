@@ -5,6 +5,7 @@ import json
 import os
 from google import genai
 from google.genai import types
+import yt_dlp
 
 # Standard homepage view
 def home(request):
@@ -25,23 +26,49 @@ def distill_recipe(request):
             if not api_key:
                 return JsonResponse({"error": "Gemini API Key is missing from Render environment variables."}, status=500)
             
-            # 2. Initialize the official Google GenAI Client
+            video_context = 'Cooking Recipe Video Stream'
+            description_context = ''
+            
+            # 2. Extract media metadata layer safely using custom browser headers
+            try:
+                ydl_opts = {
+                    'skip_download': True,
+                    'extract_flat': True,
+                    'quiet': True,
+                    'no_warnings': True,
+                    # Add a standard browser user-agent header to safely bypass simple cloud firewalls
+                    'http_headers': {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept-Language': 'en-US,en;q=0.9',
+                    }
+                }
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(video_url, download=False)
+                    video_context = info_dict.get('title', video_context)
+                    description_context = info_dict.get('description', '')
+            except Exception as yt_err:
+                print(f"yt-dlp fallback triggered: {str(yt_err)}")
+            
+            # 3. Initialize the official Google GenAI Client
             client = genai.Client(api_key=api_key)
             
-            # 3. Craft a bulletproof prompt instructing Gemini to analyze the YouTube URL content directly
+            # 4. Craft a strict prompt instructing Gemini to analyze the specific text data extracted
             prompt_instructions = f"""
-            You are a master culinary assistant trained to clean up chaotic video cooking instructions.
-            Your task is to analyze the recipe shown in this video link: {video_url}
+            You are a master culinary assistant trained to clean up video cooking instructions.
+            Analyze the following specific video stream data:
+            URL: {video_url}
+            Video Title: {video_context}
+            Video Description/Transcript Context: {description_context}
             
-            MISSION:
-            1. Extract or determine the primary title of the dish cooked in the video.
-            2. Figure out the list of ingredients required.
-            3. Break down the cooking process into a clean, simple, step-by-step array layout.
+            YOUR MISSION:
+            1. Extract the exact title of the dish from the provided Video Title (e.g., if it says Chicken Kebab, make the title Chicken Kebab).
+            2. Extract all ingredients mentioned in the title or description text details.
+            3. Break down the actual cooking process step-by-step based on the provided text details.
             
             CRITICAL DEPLOYMENT INSTRUCTIONS:
-            - If you are unable to access the live video transcript directly, analyze the words inside the URL string itself to deduce what popular recipe it refers to, and generate a standard premium recipe for that dish instead of returning an error message.
+            - Do not guess or invent a random dish like spaghetti if the text details mention a specific food item. Use the provided Title and Description text data.
             - Write all output text in very simple, easy-to-read instructions.
-            - Translate all keys and strings entirely into the chosen language code: '{target_lang}'.
+            - Translate all content entirely into the chosen language code: '{target_lang}'.
             - Return the response strictly as a valid JSON object matching this schema blueprint, without markdown code block formatting tags:
             {{
                 "title": "Clean Dish Title",
@@ -50,7 +77,7 @@ def distill_recipe(request):
             }}
             """
             
-            # 4. Call gemini-2.5-flash
+            # 5. Call gemini-2.5-flash
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=prompt_instructions,
@@ -59,7 +86,7 @@ def distill_recipe(request):
                 ),
             )
             
-            # 5. Parse the clean JSON text string back into a Python dictionary
+            # 6. Parse the clean JSON text string back into a Python dictionary
             ai_data = json.loads(response.text)
             return JsonResponse(ai_data, status=200)
             
