@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-9)%sjczw)b3k02*1c4+v($tx$3^8q*vt-dwj2xg&i952@m7$!2
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['fastchef-hlae.onrender.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
