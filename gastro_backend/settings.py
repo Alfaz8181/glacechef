@@ -41,6 +41,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -113,11 +114,21 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
+import os
 
 STATIC_URL = 'static/'
 
-import os
-
+# Tell Django where static assets sit locally
 STATICFILES_DIRS = [
-    BASE_DIR,  # Tells Django to look for style.css and app.js in our main folder
+    BASE_DIR,
 ]
+
+# The production folder where WhiteNoise will gather everything for Render
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Turn on compression and caching layout support
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
