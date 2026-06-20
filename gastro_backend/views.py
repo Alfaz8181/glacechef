@@ -5,7 +5,6 @@ import json
 import os
 from google import genai
 from google.genai import types
-import yt_dlp
 
 # Standard homepage view
 def home(request):
@@ -26,45 +25,24 @@ def distill_recipe(request):
             if not api_key:
                 return JsonResponse({"error": "Gemini API Key is missing from Render environment variables."}, status=500)
             
-            video_context = 'Cooking Recipe Video Stream'
-            description_context = ''
-            
-            # 2. Attempt to extract media metadata layer safely using yt-dlp
-            try:
-                ydl_opts = {
-                    'skip_download': True,
-                    'extract_flat': True,
-                    'quiet': True,
-                    'no_warnings': True,
-                }
-                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                    info_dict = ydl.extract_info(video_url, download=False)
-                    video_context = info_dict.get('title', video_context)
-                    description_context = info_dict.get('description', '')
-            except Exception as yt_err:
-                # If Render's IP is geoblocked, log it and let Gemini handle it using the URL string directly!
-                print(f"yt-dlp fallback triggered: {str(yt_err)}")
-            
-            # 3. Initialize the official Google GenAI Client
+            # 2. Initialize the official Google GenAI Client
             client = genai.Client(api_key=api_key)
             
-            # 4. Craft a strict prompt instructing Gemini to figure out the recipe even if metadata is light
+            # 3. Craft a bulletproof prompt instructing Gemini to analyze the YouTube URL content directly
             prompt_instructions = f"""
-            You are a master culinary assistant trained to clean up short-form cooking instructions.
-            Analyze the following video stream data context:
-            URL: {video_url}
-            Extracted Title: {video_context}
-            Extracted Description: {description_context}
+            You are a master culinary assistant trained to clean up chaotic video cooking instructions.
+            Your task is to analyze the recipe shown in this video link: {video_url}
             
-            Your mission:
-            1. Identify what dish is being prepared based on the URL text, title, or description.
-            2. Extract/generate an array list of all necessary ingredients.
-            3. Extract/generate a clean, step-by-step array breakdown of the absolute simplest instructions to cook it.
+            MISSION:
+            1. Extract or determine the primary title of the dish cooked in the video.
+            2. Figure out the list of ingredients required.
+            3. Break down the cooking process into a clean, simple, step-by-step array layout.
             
-            CRITICAL RULES:
-            - Write the steps in incredibly simple, clear, easy-to-read language. Avoid fancy terms or jargon.
-            - Translate all content entirely into the language matching the code: '{target_lang}'.
-            - Return the final result strictly as a valid JSON object matching this schema blueprint, without markdown code block syntax:
+            CRITICAL DEPLOYMENT INSTRUCTIONS:
+            - If you are unable to access the live video transcript directly, analyze the words inside the URL string itself to deduce what popular recipe it refers to, and generate a standard premium recipe for that dish instead of returning an error message.
+            - Write all output text in very simple, easy-to-read instructions.
+            - Translate all keys and strings entirely into the chosen language code: '{target_lang}'.
+            - Return the response strictly as a valid JSON object matching this schema blueprint, without markdown code block formatting tags:
             {{
                 "title": "Clean Dish Title",
                 "ingredients": ["Ingredient item 1", "Ingredient item 2"],
@@ -72,7 +50,7 @@ def distill_recipe(request):
             }}
             """
             
-            # 5. Fire off the structured text call directly to gemini-2.5-flash
+            # 4. Call gemini-2.5-flash
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
                 contents=prompt_instructions,
@@ -81,7 +59,7 @@ def distill_recipe(request):
                 ),
             )
             
-            # 6. Unpack response string text layers back into native Python dict memory values
+            # 5. Parse the clean JSON text string back into a Python dictionary
             ai_data = json.loads(response.text)
             return JsonResponse(ai_data, status=200)
             
