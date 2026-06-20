@@ -4,20 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GastroGlass // Premium AI Recipe App</title>
+    <title>FastChef</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-6 relative overflow-x-hidden">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-6 relative overflow-x-hidden">
     
     <div class="absolute w-[450px] h-[450px] bg-gradient-to-r from-emerald-500 to-cyan-400 opacity-30 rounded-full blur-[110px] top-5 left-5 animate-pulse dynamic-blob"></div>
     <div class="absolute w-[500px] h-[500px] bg-gradient-to-r from-purple-600 to-pink-500 opacity-25 rounded-full blur-[130px] bottom-5 right-5 animate-pulse dynamic-blob" style="animation-duration: 8s;"></div>
 
-    <main class="w-full max-w-3xl z-10">
+    <main class="w-full max-w-3xl z-10 my-auto">
         
         <header class="text-center mb-10">
             <h1 class="text-5xl font-extrabold tracking-tight mb-2">
-                Gastro<span class="text-emerald-400 glowing-text">Glass</span>
+                Fast<span class="text-emerald-400 glowing-text">Chef</span>
             </h1>
             <p class="text-slate-400 text-base font-medium">Convert cooking videos into crystal-clear steps.</p>
         </header>
@@ -40,7 +40,7 @@
 
                 <button type="submit" 
                     class="w-full py-4 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 font-black text-base rounded-2xl transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(52,211,153,0.4)] active:translate-y-0">
-                    Convert to Simple Steps
+                    Convert to Steps
                 </button>
             </form>
         </section>
@@ -79,6 +79,12 @@
             </div>
         </div>
     </div>
+
+    <footer class="w-full text-center py-4 z-10 mt-auto">
+        <p class="text-xs tracking-widest text-slate-500 font-medium uppercase">
+            © 2026 FastChef. All Rights Reserved. Crafted by <span class="text-emerald-400/80 font-bold">ALFAZ KALADAGI</span>.
+        </p>
+    </footer>
 
     <script src="{% static 'app.js' %}"></script>
 </body>
